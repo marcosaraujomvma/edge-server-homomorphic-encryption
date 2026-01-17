@@ -29,7 +29,9 @@ class FederatedServer:
         self.input_dim = input_dim
         self.hidden_dim = hidden_dim
         self.classes = classes
-        self.global_model = fl_common.MultiClassNN(input_dim, hidden_dim, classes)
+        self.global_model = fl_paillier_common.MultiClassNN(
+            input_dim, hidden_dim, classes
+        )
 
         # Crypto Setup
         print("[Server] Generating Paillier Keypair... this may take a moment.")
@@ -118,7 +120,7 @@ class FederatedServer:
             # 3. Finish
             print("\n[Server] Training Complete. Sending termination signal.")
             for sock in clients:
-                fl_common.send_msg(sock, {"type": "DONE"})
+                fl_paillier_common.send_msg(sock, {"type": "DONE"})
 
         finally:
             for sock in clients:

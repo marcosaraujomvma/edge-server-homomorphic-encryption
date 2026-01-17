@@ -14,7 +14,7 @@ class FederatedClient:
         self.client_id = client_id
 
         # Model
-        self.model = fl_common.MultiClassNN(784, hidden_dim, classes)
+        self.model = fl_paillier_common.MultiClassNN(784, hidden_dim, classes)
 
         # State
         self.public_key = None
@@ -49,7 +49,7 @@ class FederatedClient:
             )
 
             while True:
-                msg = fl_common.recv_msg(sock)
+                msg = fl_paillier_common.recv_msg(sock)
                 if not msg:
                     break
 
@@ -79,7 +79,7 @@ class FederatedClient:
                         "weights": encrypted_weights,
                         "samples": len(self.X_train),
                     }
-                    fl_common.send_msg(sock, response)
+                    fl_paillier_common.send_msg(sock, response)
                     print(f"[Client {self.client_id}] Update sent.")
 
                 elif msg["type"] == "DONE":
