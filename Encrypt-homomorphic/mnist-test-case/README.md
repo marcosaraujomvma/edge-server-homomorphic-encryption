@@ -4,9 +4,9 @@ This directory contains a modular implementation of Federated Learning using Pai
 
 ## Structure
 
-*   `fl_common.py`: Shared logic (Neural Network architecture, math helpers, networking protocol).
-*   `fl_server.py`: The Server. Manages the global model, generates keys, collects encrypted updates, and aggregates them.
-*   `fl_client.py`: The Client. Loads local data, trains locally, encrypts updates, and sends them to the server.
+*   `fl_paillier_common.py`: Shared logic (Neural Network architecture, math helpers, networking protocol).
+*   `fl_paillier_server.py`: The Server. Manages the global model, generates keys, collects encrypted updates, and aggregates them.
+*   `fl_paillier_client.py`: The Client. Loads local data, trains locally, encrypts updates, and sends them to the server.
 
 ## Requirements
 
@@ -33,7 +33,7 @@ deactivate
 
 ```bash
 # Wait for 2 clients, run for 3 rounds
-python fl_server.py --clients 2 --rounds 3
+python fl_paillier_server.py --clients 2 --rounds 3
 ```
 
 **Options:**
@@ -50,12 +50,12 @@ Run the client script. Give each client a unique `--id` so they load different p
 
 **Client 1:**
 ```bash
-python fl_client.py --id 0
+python fl_paillier_client.py --id 0
 ```
 
 **Client 2:**
 ```bash
-python fl_client.py --id 1
+python fl_paillier_client.py --id 1
 ```
 
 **Options:**
