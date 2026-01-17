@@ -42,7 +42,7 @@ python fl_paillier_server.py --clients 2 --rounds 3
 *   `--clients`: Number of clients required to start rounds.
 *   `--rounds`: Number of Federated Learning rounds.
 *   `--hidden`: Size of the hidden layer (must match clients).
-*   --key-size: Size of Paillier Cryptosystem key
+*   `--key-size`: Size of Paillier Cryptosystem key
 
 ### 2. Start Clients
 
