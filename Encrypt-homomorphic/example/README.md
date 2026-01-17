@@ -8,20 +8,28 @@ This directory contains a modular implementation of Federated Learning using Pai
 *   `fl_server.py`: The Server. Manages the global model, generates keys, collects encrypted updates, and aggregates them.
 *   `fl_client.py`: The Client. Loads local data, trains locally, encrypts updates, and sends them to the server.
 
-## Prerequisites
+## Requirements
 
-Ensure you are using the project's virtual environment which contains `phe` (Paillier Homomorphic Encryption) and `sklearn`.
+You can run the command below to install all the libraries required by the program:
 
 ```bash
-# From the project root
+# From the example directory
+python -m venv .venv
 source .venv/bin/activate
+pip install -r requirements.txt
+```
+
+When you're done, deactivate the Virtual Environment using:
+
+```bash
+deactivate
 ```
 
 ## Usage
 
 ### 1. Start the Server
 
-Start the server first. You need to specify how many clients to wait for.
+**Start the server first**. You need to specify how many clients to wait for.
 
 ```bash
 # Wait for 2 clients, run for 3 rounds
@@ -34,10 +42,11 @@ python fl_server.py --clients 2 --rounds 3
 *   `--clients`: Number of clients required to start rounds.
 *   `--rounds`: Number of Federated Learning rounds.
 *   `--hidden`: Size of the hidden layer (must match clients).
+*   --key-size: Size of Paillier Cryptosystem key
 
 ### 2. Start Clients
 
-Open separate terminals (one for each client) and run the client script. **Important:** Give each client a unique `--id` so they load different parts of the dataset.
+Open separate terminals (one for each client) and run the client script. Give each client a unique `--id` so they load different parts of the dataset.
 
 **Client 1:**
 ```bash
@@ -57,5 +66,5 @@ python fl_client.py --id 1
 
 ## Notes
 
-*   **Encryption Speed:** Paillier encryption is computationally intensive. The encryption step on the client side and the aggregation step on the server side might take some time (seconds to minutes depending on hardware and model size).
+*   **Encryption Speed:** Paillier encryption is computationally intensive for recommended key sizes (>=2048). The encryption step on the client side and the aggregation step on the server side might take some time (seconds to minutes depending on hardware and model size).
 *   **Data:** The scripts automatically download MNIST using `sklearn.datasets.fetch_openml` if not cached.
