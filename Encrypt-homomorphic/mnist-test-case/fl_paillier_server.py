@@ -2,7 +2,7 @@ import socket
 import argparse
 import numpy as np
 from phe import paillier
-import fl_paillier_common
+import fl_paillier_common as fl_common
 from sklearn.datasets import fetch_openml
 from sklearn.model_selection import train_test_split
 import time
@@ -25,30 +25,30 @@ class FederatedServer:
         self.num_clients = num_clients
         self.num_rounds = num_rounds
 
-        # Model Setup
+        # Configuração do Modelo
         self.input_dim = input_dim
         self.hidden_dim = hidden_dim
         self.classes = classes
-        self.global_model = fl_paillier_common.MultiClassNN(
+        self.global_model = fl_common.MultiClassNN(
             input_dim, hidden_dim, classes
         )
 
-        # Crypto Setup
+        # Configuração de Criptografia
         print("[Server] Generating Paillier Keypair... this may take a moment.")
         self.public_key, self.private_key = paillier.generate_paillier_keypair(
             n_length=n_length
         )
         print("[Server] Keys generated.")
 
-        # Test Data (for evaluation)
+        # Dados de Teste (para avaliação)
         self.X_test = None
         self.y_test = None
 
     def load_test_data(self):
         print("[Server] Loading MNIST test data for server-side evaluation...")
-        # Load a small subset for quick evaluation
+        # Carregar um pequeno subconjunto para avaliação rápida
         mnist = fetch_openml("mnist_784", version=1, parser="auto")
-        # Take last 2000 for testing to avoid overlap if clients take from beginning (naive split)
+        # Pegar os últimos 2000 para teste para evitar sobreposição se os clientes pegarem do início (divisão ingênua)
         X = mnist.data.iloc[-2000:].values / 255.0
         y = mnist.target.iloc[-2000:].astype(int).values
         self.X_test = X
@@ -73,16 +73,16 @@ class FederatedServer:
         print("[Server] All clients connected. Starting Federated Learning.")
 
         try:
-            # 1. Send Public Key to all clients
+            # 1. Enviar Chave Pública para todos os clientes
             print("[Server] Broadcasting Public Key...")
             for sock in clients:
                 fl_common.send_msg(sock, {"type": "PUB_KEY", "key": self.public_key})
 
-            # 2. FL Loop
+            # 2. Loop de Aprendizado Federado
             for round_num in range(self.num_rounds):
                 print(f"\n=== ROUND {round_num + 1}/{self.num_rounds} ===")
 
-                # A. Broadcast Global Model
+                # A. Transmitir Modelo Global
                 global_weights = self.global_model.get_weights()
                 print("[Server] Broadcasting Global Model...")
                 for sock in clients:
@@ -90,7 +90,7 @@ class FederatedServer:
                         sock, {"type": "WEIGHTS", "weights": global_weights}
                     )
 
-                # B. Receive Encrypted Updates
+                # B. Receber Atualizações Criptografadas
                 encrypted_updates = []
                 client_sizes = []
 
@@ -106,21 +106,21 @@ class FederatedServer:
                     else:
                         print(f"[Server] Error: Invalid message from Client {i + 1}")
 
-                # C. Aggregate
+                # C. Agregação
                 if encrypted_updates:
                     self.aggregate_encrypted(encrypted_updates, client_sizes)
 
-                # D. Evaluate
+                # D. Avaliação
                 if self.X_test is not None:
                     acc = self.global_model.evaluate(self.X_test, self.y_test)
                     print(
                         f"📊 Global Model Accuracy (Round {round_num + 1}): {acc:.2%}"
                     )
 
-            # 3. Finish
+            # 3. Finalizar
             print("\n[Server] Training Complete. Sending termination signal.")
             for sock in clients:
-                fl_paillier_common.send_msg(sock, {"type": "DONE"})
+                fl_common.send_msg(sock, {"type": "DONE"})
 
         finally:
             for sock in clients:
@@ -134,21 +134,21 @@ class FederatedServer:
         if total_samples == 0:
             return
 
-        # Initialize structure based on first update
+        # Inicializar estrutura baseada na primeira atualização
         first_update = encrypted_updates[0]
         agg_encrypted = {}
 
-        # Initialize accumulators
+        # Inicializar acumuladores
         for key in first_update:
             if "_shape" in key:
-                agg_encrypted[key] = first_update[key]  # Copy shape info
+                agg_encrypted[key] = first_update[key]  # Copiar informação de forma (shape)
                 continue
 
-            # Start with 0
+            # Começar com 0
             num_params = len(first_update[key])
             agg_encrypted[key] = [0] * num_params
 
-        # Weighted Sum
+        # Soma Ponderada
         for i, update in enumerate(encrypted_updates):
             factor = client_sizes[i] / total_samples
 
@@ -159,7 +159,7 @@ class FederatedServer:
                 encrypted_list = update[key]
                 for idx, enc_val in enumerate(encrypted_list):
                     # w_i * (n_i/N)
-                    # Optimization: In real Paillier, we multiply encrypted val by plain scalar
+                    # Otimização: No Paillier real, multiplicamos o valor criptografado por um escalar simples (plain)
                     weighted = enc_val * factor
 
                     if i == 0:
@@ -167,7 +167,7 @@ class FederatedServer:
                     else:
                         agg_encrypted[key][idx] = agg_encrypted[key][idx] + weighted
 
-        # Decrypt
+        # Descriptografar
         print("[Server] Decrypting aggregated model...")
         decrypted_weights = {}
         for key in agg_encrypted:

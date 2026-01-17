@@ -1,70 +1,70 @@
-# Homomorphic Federated Learning Demo using MNIST Dataset
+# Demonstração de Aprendizado Federado Homomórfico usando o Conjunto de Dados MNIST
 
-This directory contains a modular implementation of Federated Learning using Paillier Homomorphic Encryption. It allows you to run a central server and multiple clients that communicate over TCP sockets.
+Este diretório contém uma implementação modular de Aprendizado Federado usando Criptografia Homomórfica de Paillier. Ele permite que você execute um servidor central e vários clientes que se comunicam por soquetes TCP.
 
-## Structure
+## Estrutura
 
-*   `fl_paillier_common.py`: Shared logic (Neural Network architecture, math helpers, networking protocol).
-*   `fl_paillier_server.py`: The Server. Manages the global model, generates keys, collects encrypted updates, and aggregates them.
-*   `fl_paillier_client.py`: The Client. Loads local data, trains locally, encrypts updates, and sends them to the server.
+*   `fl_paillier_common.py`: Lógica compartilhada (arquitetura de Rede Neural, auxiliares matemáticos, protocolo de rede).
+*   `fl_paillier_server.py`: O Servidor. Gerencia o modelo global, gera chaves, coleta atualizações criptografadas e as agrega.
+*   `fl_paillier_client.py`: O Cliente. Carrega dados locais, treina localmente, criptografa atualizações e as envia para o servidor.
 
-## Requirements
+## Requisitos
 
-You can run the command below to install all the libraries required by the program:
+Você pode executar o comando abaixo para instalar todas as bibliotecas necessárias para o programa:
 
 ```bash
-# From the example directory
+# Do diretório de exemplo
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-When you're done running the program, deactivate the Virtual Environment using:
+Quando terminar de executar o programa, desative o Ambiente Virtual usando:
 
 ```bash
 deactivate
 ```
 
-## Usage
+## Uso
 
-### 1. Start the Server
+### 1. Iniciar o Servidor
 
-**Start the server first**. You need to specify how many clients to wait for.
+**Inicie o servidor primeiro**. Você precisa especificar quantos clientes aguardar.
 
 ```bash
-# Wait for 2 clients, run for 3 rounds
+# Aguardar 2 clientes, executar por 3 rodadas
 python fl_paillier_server.py --clients 2 --rounds 3
 ```
 
-**Options:**
-*   `--host`: IP to bind to (default 0.0.0.0).
-*   `--port`: Port to listen on (default 65432).
-*   `--clients`: Number of clients required to start rounds.
-*   `--rounds`: Number of Federated Learning rounds.
-*   `--hidden`: Size of the hidden layer (must match clients).
-*   `--key-size`: Size of Paillier Cryptosystem key
+**Opções:**
+*   `--host`: IP para vincular (padrão 0.0.0.0).
+*   `--port`: Porta para escutar (padrão 65432).
+*   `--clients`: Número de clientes necessários para iniciar as rodadas.
+*   `--rounds`: Número de rodadas de Aprendizado Federado.
+*   `--hidden`: Tamanho da camada oculta (deve corresponder aos clientes).
+*   `--key-size`: Tamanho da chave do Criptossistema Paillier
 
-### 2. Start Clients
+### 2. Iniciar Clientes
 
-Run the client script. Give each client a unique `--id` so they load different parts of the dataset.
+Execute o script do cliente. Dê a cada cliente um `--id` único para que eles carreguem diferentes partes do conjunto de dados.
 
-**Client 1:**
+**Cliente 1:**
 ```bash
 python fl_paillier_client.py --id 0
 ```
 
-**Client 2:**
+**Cliente 2:**
 ```bash
 python fl_paillier_client.py --id 1
 ```
 
-**Options:**
-*   `--ip`: Server IP address (default 127.0.0.1).
-*   `--port`: Server port (default 65432).
-*   `--id`: Unique Client ID (int). Used to slice the MNIST dataset.
-*   `--epochs`: Number of local training epochs per round.
+**Opções:**
+*   `--ip`: Endereço IP do servidor (padrão 127.0.0.1).
+*   `--port`: Porta do servidor (padrão 65432).
+*   `--id`: ID único do Cliente (int). Usado para fatiar o conjunto de dados MNIST.
+*   `--epochs`: Número de épocas de treinamento local por rodada.
 
-## Notes
+## Notas
 
-*   **Encryption Speed:** Paillier encryption is computationally intensive for recommended key sizes (>=2048). The encryption step on the client side and the aggregation step on the server side might take some time (seconds to minutes depending on hardware and model size).
-*   **Data:** The scripts automatically download MNIST using `sklearn.datasets.fetch_openml` if not cached.
+*   **Velocidade de Criptografia:** A criptografia Paillier é computacionalmente intensiva para tamanhos de chave recomendados (>=2048). A etapa de criptografia no lado do cliente e a etapa de agregação no lado do servidor podem levar algum tempo (segundos a minutos dependendo do hardware e tamanho do modelo).
+*   **Dados:** Os scripts baixam automaticamente o MNIST usando `sklearn.datasets.fetch_openml` se não estiver em cache.

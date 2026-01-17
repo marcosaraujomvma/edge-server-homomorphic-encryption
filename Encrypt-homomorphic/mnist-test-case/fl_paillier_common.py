@@ -3,30 +3,30 @@ import struct
 import pickle
 
 # ==========================================
-# 1. NETWORKING HELPERS
+# 1. HELPERS DE REDE
 # ==========================================
 
 def send_msg(sock, data):
-    """Pickles data and sends it with a 4-byte length prefix."""
+    """Serializa (pickle) os dados e os envia com um prefixo de comprimento de 4 bytes."""
     msg = pickle.dumps(data)
-    # Prefix each message with a 4-byte big-endian unsigned integer (network byte order)
+    # Prefixar cada mensagem com um inteiro não assinado big-endian de 4 bytes (ordem de byte de rede)
     sock.sendall(struct.pack('>I', len(msg)) + msg)
 
 def recv_msg(sock):
-    """Receives a 4-byte length prefix and then the pickled data."""
-    # Read message length
+    """Recebe um prefixo de comprimento de 4 bytes e depois os dados serializados."""
+    # Ler comprimento da mensagem
     raw_msglen = recvall(sock, 4)
     if not raw_msglen:
         return None
     msglen = struct.unpack('>I', raw_msglen)[0]
-    # Read the message data
+    # Ler os dados da mensagem
     msg = recvall(sock, msglen)
     if not msg:
         return None
     return pickle.loads(msg)
 
 def recvall(sock, n):
-    """Helper function to receive n bytes or return None if EOF is hit."""
+    """Função auxiliar para receber n bytes ou retornar None se EOF for atingido."""
     data = b''
     while len(data) < n:
         packet = sock.recv(n - len(data))
@@ -36,7 +36,7 @@ def recvall(sock, n):
     return data
 
 # ==========================================
-# 2. MATH HELPERS
+# 2. HELPERS MATEMÁTICOS
 # ==========================================
 
 def one_hot(y, num_classes=10):
@@ -57,13 +57,13 @@ def relu_deriv(z):
     return (z > 0).astype(float)
 
 # ==========================================
-# 3. NEURAL NETWORK CLASS
+# 3. CLASSE REDE NEURAL
 # ==========================================
 
 class MultiClassNN:
     def __init__(self, input_size: int, hidden_size: int, output_size: int):
         np.random.seed(42)
-        # He Initialization
+        # Inicialização He
         self.W1 = np.random.randn(input_size, hidden_size) * np.sqrt(2.0 / input_size)
         self.b1 = np.zeros((1, hidden_size))
         self.W2 = np.random.randn(hidden_size, output_size) * np.sqrt(2.0 / hidden_size)
@@ -106,7 +106,7 @@ class MultiClassNN:
                 dW1 = np.dot(X_batch.T, dz1) / current_batch_size
                 db1 = np.sum(dz1, axis=0, keepdims=True) / current_batch_size
 
-                # --- Update ---
+                # --- Atualização ---
                 self.W1 -= learning_rate * dW1
                 self.b1 -= learning_rate * db1
                 self.W2 -= learning_rate * dW2
@@ -125,7 +125,7 @@ class MultiClassNN:
         self.W2, self.b2 = weights["W2"].copy(), weights["b2"].copy()
 
     def evaluate(self, X, y):
-        """Calculates accuracy on test data"""
+        """Calcula a precisão nos dados de teste"""
         predictions = self.forward(X)
         pred_labels = np.argmax(predictions, axis=1)
         return np.mean(pred_labels == y)

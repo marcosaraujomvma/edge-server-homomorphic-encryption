@@ -13,10 +13,10 @@ class FederatedClient:
         self.server_port = server_port
         self.client_id = client_id
 
-        # Model
+        # Modelo
         self.model = fl_paillier_common.MultiClassNN(784, hidden_dim, classes)
 
-        # State
+        # Estado
         self.public_key = None
         self.X_train = None
         self.y_train = None
@@ -25,12 +25,12 @@ class FederatedClient:
         print(f"[Client {self.client_id}] Loading local data...")
         mnist = fetch_openml("mnist_784", version=1, parser="auto")
 
-        # Simple partitioning based on client ID to simulate distributed data
-        # Offset to avoid the test set used by server (last 2000)
+        # Particionamento simples baseado no ID do cliente para simular dados distribuídos
+        # Deslocamento para evitar o conjunto de teste usado pelo servidor (últimos 2000)
         start_idx = self.client_id * samples
         end_idx = start_idx + samples
 
-        # Safety check
+        # Verificação de segurança
         if end_idx > 68000:
             print("Warning: Index out of bounds, wrapping around")
             start_idx = start_idx % 60000
@@ -61,19 +61,19 @@ class FederatedClient:
                     print(
                         f"[Client {self.client_id}] Received Global Model. Starting Local Training..."
                     )
-                    # 1. Update Local Model
+                    # 1. Atualizar Modelo Local
                     self.model.set_weights(msg["weights"])
 
-                    # 2. Train Locally
+                    # 2. Treinar Localmente
                     self.model.train(self.X_train, self.y_train, epochs=local_epochs)
 
-                    # 3. Encrypt Weights
+                    # 3. Criptografar Pesos
                     print(
                         f"[Client {self.client_id}] Encrypting weights (this takes time)..."
                     )
                     encrypted_weights = self.encrypt_weights(self.model.get_weights())
 
-                    # 4. Send Update
+                    # 4. Enviar Atualização
                     response = {
                         "type": "UPDATE",
                         "weights": encrypted_weights,
@@ -102,7 +102,7 @@ class FederatedClient:
         encrypted_dict = {}
         for key, val in weights.items():
             flat_val = val.flatten()
-            # Encrypt each scalar
+            # Criptografar cada escalar
             encrypted_dict[key] = [self.public_key.encrypt(float(x)) for x in flat_val]
             encrypted_dict[key + "_shape"] = val.shape
 
