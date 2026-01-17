@@ -1,4 +1,4 @@
-# Homomorphic Federated Learning Demo (Host-to-Host)
+# Homomorphic Federated Learning Demo using MNIST Dataset
 
 This directory contains a modular implementation of Federated Learning using Paillier Homomorphic Encryption. It allows you to run a central server and multiple clients that communicate over TCP sockets.
 
@@ -19,7 +19,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-When you're done, deactivate the Virtual Environment using:
+When you're done running the program, deactivate the Virtual Environment using:
 
 ```bash
 deactivate
