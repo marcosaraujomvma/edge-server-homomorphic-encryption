@@ -46,7 +46,7 @@ python fl_server.py --clients 2 --rounds 3
 
 ### 2. Start Clients
 
-Open separate terminals (one for each client) and run the client script. Give each client a unique `--id` so they load different parts of the dataset.
+Run the client script. Give each client a unique `--id` so they load different parts of the dataset.
 
 **Client 1:**
 ```bash
